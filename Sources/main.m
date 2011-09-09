@@ -14,6 +14,6 @@ MSInitialize
 	NSLog(@"Exposed -> version %@ loaded", kBHVNCServerVersionString);	
 	[[NSNotificationCenter defaultCenter] addObserver: [BHVNCServer sharedInstance] 
 											 selector: @selector(prepareForLaunch) 
-												 name: @"DisplayColorMode" 
+												 name: @"StartExposed" 
 											   object: nil];
 }

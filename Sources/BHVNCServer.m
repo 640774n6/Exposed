@@ -196,9 +196,10 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 { 
 	NSString *settingsPath = [[NSString stringWithFormat: @"~/Library/Preferences/%@.plist", kBHVNCServerDomainID] stringByExpandingTildeInPath];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile: settingsPath];
-	if(!settings)
+	int keyCount = [[settings allKeys] count];
+	if(!settings || (keyCount != 7))
 	{
-		NSLog(@"Exposed -> settings not found, creating defaults...");
+		NSLog(@"Exposed -> settings not found or incomplete, creating defaults...");
 		settings = [NSDictionary dictionaryWithObjectsAndKeys:
 										 [NSNumber numberWithBool: YES], kVNCSettingsEnabledKey,
 										 [NSNumber numberWithBool: YES], kVNCSettingsDefaultScreenSizeKey,
@@ -338,9 +339,10 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 - (void) prepareForLaunch
 {
     [[NSNotificationCenter defaultCenter] removeObserver: self
-                                                    name: @"DisplayColorMode"
+                                                    name: @"StartExposed"
                                                   object: nil];
-    [self updateFromSettings];
+	[NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateFromSettings) userInfo:nil repeats:NO];
+		//[self updateFromSettings];
 }
 
 - (void) updateFromSettings
@@ -378,6 +380,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 {
 	if(!_serverStarted)
 	{		
+		
 		NSLog(@"Exposed -> starting server...");
 		rfbServer = rfbGetScreen(0, NULL, _currentSettings.scaledWidth, _currentSettings.scaledHeight, 8, 3, 4);
 		rfbServer->desktopName = "Exposed - AppleTV VNC Server";

@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		32B9865714120159001D95EB /* BHVNCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A3955412BFECB700768E01 /* BHVNCServer.m */; };
+		32B9865814120159001D95EB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A3957412BFEDC200768E01 /* main.m */; };
+		32B9871914120167001D95EB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A3955C12BFECD600768E01 /* Foundation.framework */; };
+		32B9871A14120167001D95EB /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A3956812BFED0300768E01 /* IOSurface.framework */; };
+		32B9871B14120167001D95EB /* libvncserver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A3954E12BFECB700768E01 /* libvncserver.a */; };
+		32B9871C14120167001D95EB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A3956012BFECDE00768E01 /* QuartzCore.framework */; };
+		32B9871D14120167001D95EB /* libsubstrate.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C126FA9912C29520006C6614 /* libsubstrate.dylib */; };
+		32B9871E14120167001D95EB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1DB26C612FAAC720023FAEE /* UIKit.framework */; };
 		C126FA9A12C29520006C6614 /* libsubstrate.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C126FA9912C29520006C6614 /* libsubstrate.dylib */; };
 		C1A3955912BFECB700768E01 /* libvncserver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A3954E12BFECB700768E01 /* libvncserver.a */; };
 		C1A3955B12BFECB700768E01 /* BHVNCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A3955412BFECB700768E01 /* BHVNCServer.m */; };
@@ -18,7 +26,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8D5B49B6048680CD000E48DA /* Exposed.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Exposed.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		32B9865314120131001D95EB /* Exposed.dylib */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Exposed.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D5B49B6048680CD000E48DA /* Exposed.dylib */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Exposed.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		C126FA9812C29520006C6614 /* substrate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = substrate.h; sourceTree = "<group>"; };
 		C126FA9912C29520006C6614 /* libsubstrate.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsubstrate.dylib; sourceTree = "<group>"; };
 		C1A3954712BFECB700768E01 /* keysym.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keysym.h; sourceTree = "<group>"; };
@@ -43,6 +52,19 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		32B9865114120131001D95EB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				32B9871914120167001D95EB /* Foundation.framework in Frameworks */,
+				32B9871A14120167001D95EB /* IOSurface.framework in Frameworks */,
+				32B9871B14120167001D95EB /* libvncserver.a in Frameworks */,
+				32B9871C14120167001D95EB /* QuartzCore.framework in Frameworks */,
+				32B9871D14120167001D95EB /* libsubstrate.dylib in Frameworks */,
+				32B9871E14120167001D95EB /* UIKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D5B49B3048680CD000E48DA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -85,7 +107,8 @@
 		19C28FB8FE9D52D311CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D5B49B6048680CD000E48DA /* Exposed.bundle */,
+				8D5B49B6048680CD000E48DA /* Exposed.dylib */,
+				32B9865314120131001D95EB /* Exposed.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -179,12 +202,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		32B9865214120131001D95EB /* Exposed2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 32B986561412014F001D95EB /* Build configuration list for PBXNativeTarget "Exposed2" */;
+			buildPhases = (
+				32B9865014120131001D95EB /* Sources */,
+				32B9865114120131001D95EB /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Exposed2;
+			productName = Exposed2;
+			productReference = 32B9865314120131001D95EB /* Exposed.dylib */;
+			productType = "com.apple.product-type.library.static";
+		};
 		8D5B49AC048680CD000E48DA /* Exposed */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB913A08733D840010E9CD /* Build configuration list for PBXNativeTarget "Exposed" */;
 			buildPhases = (
 				8D5B49B1048680CD000E48DA /* Sources */,
 				8D5B49B3048680CD000E48DA /* Frameworks */,
+				32B98740141203B3001D95EB /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -193,7 +233,7 @@
 			name = Exposed;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = Exposed;
-			productReference = 8D5B49B6048680CD000E48DA /* Exposed.bundle */;
+			productReference = 8D5B49B6048680CD000E48DA /* Exposed.dylib */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -216,11 +256,37 @@
 			projectRoot = "";
 			targets = (
 				8D5B49AC048680CD000E48DA /* Exposed */,
+				32B9865214120131001D95EB /* Exposed2 */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		32B98740141203B3001D95EB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=/opt/local/bin:/opt/local/sbin:/usr/local/git:$PATH\n\nEXPOSED_BUILD_BINARY=$TARGET_BUILD_DIR/$PRODUCT_NAME.dylib/$PRODUCT_NAME\nEXPOSED_PLIST=$SRCROOT/Exposed.plist\n\nLAYOUT=$SRCROOT/layout\nCONTROL_FILE=$LAYOUT/DEBIAN/control\n\nSUBSTRATE_LAYOUT_PATH=$LAYOUT/Library/MobileSubstrate/DynamicLibraries\n\nEXPOSED_FINAL_BIN_PATH=$SUBSTRATE_LAYOUT_PATH/$PRODUCT_NAME.dylib\n\nDPKG_BUILD_PATH=$SRCROOT/_\n\nDPKG_DEBIAN_PATH=$DPKG_BUILD_PATH/DEBIAN\n\nrm -rf $DPKG_BUILD_PATH\n\nmkdir -p $DPKG_BUILD_PATH\n\nmkdir -p $DPKG_DEBIAN_PATH\n\nmkdir -p $SUBSTRATE_LAYOUT_PATH\n\nrm -rf $EXPOSED_FINAL_BIN_PATH\n\ncp $EXPOSED_BUILD_BINARY $EXPOSED_FINAL_BIN_PATH\ncp $EXPOSED_PLIST $SUBSTRATE_LAYOUT_PATH/\n\nCONTROL_PACKAGE_NAME=`cat layout/DEBIAN/control | grep \"^Package:\" | cut -d' ' -f2-`\nCONTROL_PACKAGE_ARCH=`cat layout/DEBIAN/control | grep \"^Architecture:\" | cut -d' ' -f2-`\nCONTROL_PACKAGE_BASE_VERSION=`cat layout/DEBIAN/control | grep \"^Version:\" | cut -d' ' -f2-`\nFILENAME=\"$CONTROL_PACKAGE_NAME\"_\"$CONTROL_PACKAGE_BASE_VERSION\"_iphoneos-\"$CONTROL_PACKAGE_ARCH\".deb\necho $FILENAME\n\nFAUXSU_PATH=`which fauxsu`\nDPKG_DEB_PATH=`which dpkg-deb`\n\ncd $LAYOUT\n\n# clear out any files we know could typically be invisible and make their way in\n\n#find . -name \".DS_Store\" | xargs rm -rf\n#find . -name \".svn\" | xargs rm -rf\n#find . -name \".git\" | xargs rm -rf\n\n# cant do that!! we need that layout folder in the repo, durr!\n\nrsync -a \"$LAYOUT\"/ \"$DPKG_BUILD_PATH\"/ --exclude \"_MTN\" --exclude \".git\" --exclude \".svn\" --exclude \".DS_Store\" --exclude \"._*\"\ncp $CONTROL_FILE $DPKG_DEBIAN_PATH/\n\nif [ -f \"$FAUXSU_PATH\" ]; then\n\n\techo \"we got fauxsu!\"\n\t\"$FAUXSU_PATH\" chown -R root:wheel \"$DPKG_BUILD_PATH\"/\n\tif [ -f \"$DPKG_DEB_PATH\" ]; then\n\t\techo \"we have dpkg-deb too!\"\n\t\t\"$FAUXSU_PATH\" \"$DPKG_DEB_PATH\" -b \"$DPKG_BUILD_PATH\" $SRCROOT/$FILENAME\n\tfi\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		32B9865014120131001D95EB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				32B9865714120159001D95EB /* BHVNCServer.m in Sources */,
+				32B9865814120159001D95EB /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D5B49B1048680CD000E48DA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -239,12 +305,14 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
 				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_EXTENSION = dylib;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -256,12 +324,13 @@
 					"\"$(SRCROOT)/Libraries/libvncserver\"",
 					"\"$(SRCROOT)/Libraries/libsubstrate\"",
 				);
+				MACH_O_TYPE = mh_execute;
 				OTHER_LDFLAGS = (
 					"-undefined",
 					dynamic_lookup,
 				);
 				PRODUCT_NAME = Exposed;
-				WRAPPER_EXTENSION = bundle;
+				WRAPPER_EXTENSION = dylib;
 			};
 			name = Debug;
 		};
@@ -320,6 +389,65 @@
 			};
 			name = Release;
 		};
+		32B9865414120131001D95EB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_EXTENSION = dylib;
+				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_SYMBOL_SEPARATION = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Sources/Support/Exposed.pch;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Libraries/libvncserver\"",
+					"\"$(SRCROOT)/Libraries/libsubstrate\"",
+				);
+				MACH_O_TYPE = mh_dylib;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Exposed;
+				SDKROOT = iphoneos;
+				SEPARATE_STRIP = NO;
+				SKIP_INSTALL = NO;
+			};
+			name = Debug;
+		};
+		32B9865514120131001D95EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Libraries/libvncserver\"",
+					"\"$(SRCROOT)/Libraries/libsubstrate\"",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Exposed2;
+				SDKROOT = iphoneos;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -337,6 +465,15 @@
 			buildConfigurations = (
 				1DEB913F08733D840010E9CD /* Debug */,
 				1DEB914008733D840010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		32B986561412014F001D95EB /* Build configuration list for PBXNativeTarget "Exposed2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				32B9865414120131001D95EB /* Debug */,
+				32B9865514120131001D95EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

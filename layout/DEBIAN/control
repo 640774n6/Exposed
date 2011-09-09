@@ -1,0 +1,10 @@
+Architecture: iphoneos-arm
+Name: Exposed
+Package: com.whatanutbar.exposed
+Version: 0.6-3
+Website: brandon-holland.com
+Maintainer: Brandon Holland <bholland@brandon-holland.com>
+Author: Brandon Holland
+Description: VNC Server for AppleTV 2G
+Section: Utilities
+Depends: mobilesubstrate
