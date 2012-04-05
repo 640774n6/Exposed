@@ -1,0 +1,7 @@
+this tweak actually kick starts exposed by sending a notification after the finder finishes loading, this is kind of ghetto but whatever, it works.
+
+exposed used to be working of a notification that i was (unknowingly) dispatching inside the (now deprecated) com.nito.gs, without that notification i couldn't figure another work around
+
+this requires these to build
+
+git clone https://github.com/DHowett/theos.git

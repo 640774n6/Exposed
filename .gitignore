@@ -1,0 +1,7 @@
+svn
+.DS_Store
+com.*
+_
+build
+theos
+

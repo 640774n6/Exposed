@@ -11,7 +11,7 @@
 #include "rfb.h"
 #include "keysym.h"
 
-#define kBHVNCServerVersionString					@"0.6"
+#define kBHVNCServerVersionString					@"0.6-2"
 #define kBHVNCServerDomainID						@"com.whatanutbar.exposed"
 #define kBHVNCServerCharacterSet					@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?\t "
 #define kBHVNCServerBackspaceString					@"\uf73e"

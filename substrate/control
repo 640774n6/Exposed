@@ -1,0 +1,10 @@
+Architecture: iphoneos-arm
+Name: screen saver hack
+Package: com.nito.sshack
+Version: 0.1
+Website: nitosoft.com
+Maintainer: nito
+Author: nito
+Description: screen saver hack
+Section: Utilities
+Depends: mobilesubstrate
