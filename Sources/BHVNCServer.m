@@ -3,11 +3,10 @@
 //  Exposed
 //
 //  Created by Brandon Holland on 10-10-10.
-//  Copyright 2010 __MyCompanyName__. All rights reserved.
+//  Copyright 2010 What a Nutbar Software. All rights reserved.
 //
 
 #import "BHVNCServer.h"
-#import "IOSurface.h"
 
 #pragma mark -
 #pragma mark C Functions
@@ -119,7 +118,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 			{
 				NSString *eventStr = [NSString stringWithString: kBHVNCServerBackspaceString];
 				NSDictionary *eventDict = [NSDictionary dictionaryWithObjectsAndKeys: eventStr, @"kBRKeyEventCharactersKey", nil];
-				NSString *osBuild = [[BRSettingsFacade singleton] versionOSBuild];
+				NSString *osBuild = [[ATVSettingsFacade singleton] versionOSBuild];
 				int eventAction = 48;
 				if([osBuild isEqualToString: @"8M89"])
 				{ eventAction = 47; }
@@ -137,7 +136,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 				{
 					NSString *eventStr = [NSString stringWithFormat: @"%c", keySym];
 					NSDictionary *eventDict = [NSDictionary dictionaryWithObjectsAndKeys: eventStr, @"kBRKeyEventCharactersKey", nil];
-					NSString *osBuild = [[BRSettingsFacade singleton] versionOSBuild];
+					NSString *osBuild = [[ATVSettingsFacade singleton] versionOSBuild];
 					int eventAction = 48;
 					if([osBuild isEqualToString: @"8M89"])
 					{ eventAction = 47; }
@@ -168,6 +167,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 		_serverStarted = NO;
 		usingFallback = YES;
 		rfbServer = NULL;
+        screenSurface = NULL;
 	}
 	return self;
 }
@@ -214,50 +214,27 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	return settings;
 }
 
++ (IOSurfaceRef) findSurfaceWithHighestSeed
+{   
+    int maxSeed = 0;
+    IOSurfaceRef returnSurface = NULL;
+    
+    for(int i = 0; i < 2000; i++)
+    {
+        IOSurfaceRef surface = IOSurfaceLookup(i);
+        int seed = IOSurfaceGetSeed(surface);
+        if(seed > maxSeed)
+        {
+            maxSeed = seed;
+            returnSurface = surface;
+        }
+    }
+    return returnSurface;
+}
+
 #pragma mark -
 #pragma mark Private Methods
 #pragma mark
-
-- (void) _markModifiedRectsInFrameBuffer1: (uint32_t *)fb1 frameBuffer2: (uint32_t *) fb2 width: (int) width height: (int) height
-{
-	CGSize cellSize = CGSizeMake(32, 32);
-	int cellColumns = width / cellSize.width;
-	int cellRows = height / cellSize.height;
-	
-	for(int r = 0; r < cellRows; r++)
-	{
-		for(int c = 0; c < cellColumns; c++)
-		{
-			CGPoint cellPoint;
-			cellPoint.x = c * cellSize.width;
-			cellPoint.y = r * cellSize.height;
-			
-			BOOL modified = NO;
-			for(int y = cellPoint.y; y < (cellPoint.y + cellSize.height); y++)
-			{
-				for(int x = cellPoint.x; x < (cellPoint.x + cellSize.width); x++)
-				{
-					uint32_t pixel1 = fb1[x + (y * width)];
-					uint32_t pixel2 = fb2[x + (y * width)];
-					if(pixel1 != pixel2)
-					{
-						modified = YES;
-						break;
-					}
-				}
-				if(modified)
-				{
-					rfbMarkRectAsModified(rfbServer, 
-										  cellPoint.x, 
-										  cellPoint.y, 
-										  (cellPoint.x + cellSize.width), 
-										  (cellPoint.y + cellSize.height));
-					break;
-				}
-			}
-		}
-	}
-}
 
 - (void) _refreshThread
 {
@@ -294,8 +271,10 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	{
 		if(rfbServer->clientHead)
 		{
-			IOSurfaceRef screenSurface;
-			if(!_currentSettings.forceFallback && (screenSurface = IOSurfaceLookup(1)))
+            if(!screenSurface && IOSurfaceLookup(1))
+            { screenSurface = [BHVNCServer findSurfaceWithHighestSeed]; }
+                
+			if(!_currentSettings.forceFallback && screenSurface)
 			{
 				if(usingFallback)
 				{
@@ -338,9 +317,12 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 - (void) prepareForLaunch
 {
     [[NSNotificationCenter defaultCenter] removeObserver: self
-                                                    name: @"DisplayColorMode"
+                                                    name: kBHVNCServerShouldLaunchNotification
                                                   object: nil];
-    [self updateFromSettings];
+    
+    [self performSelector: @selector(updateFromSettings)
+               withObject: nil
+               afterDelay: 5.0];
 }
 
 - (void) updateFromSettings
@@ -397,6 +379,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 		rfbInitServer(rfbServer);		
 		_serverStarted = YES;
 		usingFallback = YES;
+        screenSurface = NULL;
 		[NSThread detachNewThreadSelector: @selector(_refreshThread) toTarget: self withObject: nil];
 		NSLog(@"Exposed -> server started :)");
 	}

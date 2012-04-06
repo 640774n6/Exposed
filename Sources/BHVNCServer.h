@@ -3,15 +3,16 @@
 //  Exposed
 //
 //  Created by Brandon Holland on 10-10-10.
-//  Copyright 2010 __MyCompanyName__. All rights reserved.
+//  Copyright 2010 What a Nutbar Software. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "IOSurface.h"
 #include "rfb.h"
 #include "keysym.h"
 
-#define kBHVNCServerVersionString					@"0.6"
+#define kBHVNCServerVersionString					@"0.7(Spider Kitten)"
 #define kBHVNCServerDomainID						@"com.whatanutbar.exposed"
 #define kBHVNCServerCharacterSet					@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?\t "
 #define kBHVNCServerBackspaceString					@"\uf73e"
@@ -20,6 +21,7 @@
 #define kBHVNCServerDefaultFrameAspectRatio			720.0 / 1280.0
 #define kBHVNCServerClientConnectedNotification		@"BHVNCServerClientConnected"
 #define kBHVNCServerClientDisconnectedNotification	@"BHVNCServerClientDisconnected"
+#define kBHVNCServerShouldLaunchNotification        @"BHVNCServerShouldLaunch"
 
 #define kVNCSettingsEnabledKey						@"Enabled"
 #define kVNCSettingsDefaultScreenSizeKey			@"DefaultScreenSize"
@@ -47,6 +49,7 @@ typedef struct
 	BHVNCSettings _currentSettings;
 	BOOL _serverStarted;
 	BOOL usingFallback;
+    IOSurfaceRef screenSurface;
 }
 + (id) sharedInstance;
 + (NSDictionary *) settingsDict;
