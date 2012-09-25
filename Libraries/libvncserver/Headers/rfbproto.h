@@ -1,8 +1,21 @@
 #ifndef RFBPROTO_H
 #define RFBPROTO_H
 
+/**
+ @mainpage
+ @li @ref libvncserver_api
+ @li @ref libvncserver_doc
+
+
+ @li @ref libvncclient_api
+ @li @ref libvncclient_doc
+
+*/
+
 /*
+ *  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
  *  Copyright (C) 2005 Rohit Kumar, Johannes E. Schindelin
+ *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2000-2002 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -68,6 +81,16 @@
 #endif
 #endif
 
+/* some autotool versions do not properly prefix
+   WORDS_BIGENDIAN, so do that manually */
+#ifdef WORDS_BIGENDIAN
+#define LIBVNCSERVER_WORDS_BIGENDIAN
+#endif
+
+/* MS compilers don't have strncasecmp */
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
+#endif
 
 #if !defined(WIN32) || defined(__MINGW32__)
 #define max(a,b) (((a)>(b))?(a):(b))
@@ -96,7 +119,7 @@ typedef uint32_t in_addr_t;
 #define                INADDR_NONE     ((in_addr_t) 0xffffffff)
 #endif
 
-#define MAX_ENCODINGS 20
+#define MAX_ENCODINGS 21
 
 /*****************************************************************************
  *
@@ -264,6 +287,19 @@ typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
 #define rfbTight 16
 #define rfbUltra 17
 #define rfbTLS 18
+#define rfbVeNCrypt 19
+#define rfbARD 30
+#define rfbMSLogon 0xfffffffa
+
+#define rfbVeNCryptPlain 256
+#define rfbVeNCryptTLSNone 257
+#define rfbVeNCryptTLSVNC 258
+#define rfbVeNCryptTLSPlain 259
+#define rfbVeNCryptX509None 260
+#define rfbVeNCryptX509VNC 261
+#define rfbVeNCryptX509Plain 262
+#define rfbVeNCryptX509SASL 263
+#define rfbVeNCryptTLSSASL 264
 
 /*
  * rfbConnFailed:	For some reason the connection failed (e.g. the server
@@ -357,7 +393,6 @@ typedef struct {
 #define rfbServerCutText 3
 /* Modif sf@2002 */
 #define rfbResizeFrameBuffer 4
-#define rfbKeyFrameUpdate 5
 #define rfbPalmVNCReSizeFrameBuffer 0xF
 
 /* client -> server */
@@ -380,9 +415,10 @@ typedef struct {
 /* Modif sf@2002 - TextChat - Bidirectionnal */
 #define rfbTextChat	11
 /* Modif cs@2005 */
-#define rfbKeyFrameRequest 12
 /* PalmVNC 1.4 & 2.0 SetScale Factor message */
 #define rfbPalmVNCSetScaleFactor 0xF
+/* Xvp message - bidirectional */
+#define rfbXvp 250
 
 
 
@@ -400,6 +436,7 @@ typedef struct {
 #define rfbEncodingHextile 5
 #define rfbEncodingZlib 6
 #define rfbEncodingTight 7
+#define rfbEncodingTightPng 0xFFFFFEFC /* -260 */
 #define rfbEncodingZlibHex 8
 #define rfbEncodingUltra 9
 #define rfbEncodingZRLE 16
@@ -417,8 +454,13 @@ typedef struct {
 #define rfbEncodingSolMonoZip            0xFFFF0008
 #define rfbEncodingUltraZip              0xFFFF0009
 
+/* Xvp pseudo-encoding */
+#define rfbEncodingXvp 			 0xFFFFFECB
+
 /*
  * Special encoding numbers:
+ *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level
+ *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
  *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels;
  *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data;
  *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions;
@@ -426,6 +468,15 @@ typedef struct {
  *   0xFFFFFFE0 .. 0xFFFFFFEF -- quality level for JPEG compressor;
  *   0xFFFFFFF0 .. 0xFFFFFFFF -- cross-encoding compression levels.
  */
+
+#define rfbEncodingFineQualityLevel0   0xFFFFFE00
+#define rfbEncodingFineQualityLevel100 0xFFFFFE64
+#define rfbEncodingSubsamp1X           0xFFFFFD00
+#define rfbEncodingSubsamp4X           0xFFFFFD01
+#define rfbEncodingSubsamp2X           0xFFFFFD02
+#define rfbEncodingSubsampGray         0xFFFFFD03
+#define rfbEncodingSubsamp8X           0xFFFFFD04
+#define rfbEncodingSubsamp16X          0xFFFFFD05
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
@@ -488,18 +539,6 @@ typedef struct {
 } rfbFramebufferUpdateMsg;
 
 #define sz_rfbFramebufferUpdateMsg 4
-
-/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * KeyFrameUpdate - Acknowledgment of a key frame request, it tells the client
- * that the next update received will be a key frame.
- */
-
-typedef struct {
-    uint8_t type;
-} rfbKeyFrameUpdateMsg;
-
-#define sz_rfbKeyFrameUpdateMsg 1
-
 
 /*
  * Each rectangle of pixel data consists of a header describing the position
@@ -679,7 +718,10 @@ typedef struct {
 #ifdef LIBVNCSERVER_HAVE_LIBZ
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * Tight Encoding.
+ * Tight and TightPng Encoding.
+ *
+ *-- TightPng is like Tight but basic compression is not used, instead PNG
+ *   data is sent.
  *
  *-- The first byte of each Tight-encoded rectangle is a "compression control
  *   byte". Its format is as follows (bit 0 is the least significant one):
@@ -690,28 +732,37 @@ typedef struct {
  *   bit 3:    if 1, then compression stream 3 should be reset;
  *   bits 7-4: if 1000 (0x08), then the compression type is "fill",
  *             if 1001 (0x09), then the compression type is "jpeg",
- *             if 0xxx, then the compression type is "basic",
- *             values greater than 1001 are not valid.
+ *             (Tight only) if 1010 (0x0A), then the compression type is
+ *               "basic" and no Zlib compression was used,
+ *             (Tight only) if 1110 (0x0E), then the compression type is
+ *               "basic", no Zlib compression was used, and a "filter id" byte
+ *               follows this byte,
+ *             (TightPng only) if 1010 (0x0A), then the compression type is
+ *               "png",
+ *             if 0xxx, then the compression type is "basic" and Zlib
+ *               compression was used,
+ *             values greater than 1010 are not valid.
  *
- * If the compression type is "basic", then bits 6..4 of the
- * compression control byte (those xxx in 0xxx) specify the following:
+ * If the compression type is "basic" and Zlib compression was used, then bits
+ * 6..4 of the compression control byte (those xxx in 0xxx) specify the
+ * following:
  *
  *   bits 5-4:  decimal representation is the index of a particular zlib
  *              stream which should be used for decompressing the data;
  *   bit 6:     if 1, then a "filter id" byte is following this byte.
  *
  *-- The data that follows after the compression control byte described
- * above depends on the compression type ("fill", "jpeg" or "basic").
+ * above depends on the compression type ("fill", "jpeg", "png" or "basic").
  *
  *-- If the compression type is "fill", then the only pixel value follows, in
  * client pixel format (see NOTE 1). This value applies to all pixels of the
  * rectangle.
  *
- *-- If the compression type is "jpeg", the following data stream looks like
- * this:
+ *-- If the compression type is "jpeg" or "png", the following data stream
+ * looks like this:
  *
  *   1..3 bytes:  data size (N) in compact representation;
- *   N bytes:     JPEG image.
+ *   N bytes:     JPEG or PNG image.
  *
  * Data size is compactly represented in one, two or three bytes, according
  * to the following scheme:
@@ -792,7 +843,7 @@ typedef struct {
  *-- NOTE 2. The decoder must reset compression streams' states before
  * decoding the rectangle, if some of bits 0,1,2,3 in the compression control
  * byte are set to 1. Note that the decoder must reset zlib streams even if
- * the compression type is "fill" or "jpeg".
+ * the compression type is "fill", "jpeg" or "png".
  *
  *-- NOTE 3. The "gradient" filter and "jpeg" compression may be used only
  * when bits-per-pixel value is either 16 or 32, not 8.
@@ -806,7 +857,9 @@ typedef struct {
 #define rfbTightExplicitFilter         0x04
 #define rfbTightFill                   0x08
 #define rfbTightJpeg                   0x09
-#define rfbTightMaxSubencoding         0x09
+#define rfbTightNoZlib                 0x0A
+#define rfbTightPng                    0x0A
+#define rfbTightMaxSubencoding         0x0A
 
 /* Filters to improve compression efficiency */
 #define rfbTightFilterCopy             0x00
@@ -1039,6 +1092,44 @@ typedef struct _rfbTextChatMsg {
 #define rfbTextChatFinished 0xFFFFFFFD  
 
 
+/*-----------------------------------------------------------------------------
+ * Xvp Message
+ * Bidirectional message
+ * A server which supports the xvp extension declares this by sending a message
+ * with an Xvp_INIT xvp-message-code when it receives a request from the client
+ * to use the xvp Pseudo-encoding. The server must specify in this message the
+ * highest xvp-extension-version it supports: the client may assume that the
+ * server supports all versions from 1 up to this value. The client is then
+ * free to use any supported version. Currently, only version 1 is defined.
+ *
+ * A server which subsequently receives an xvp Client Message requesting an
+ * operation which it is unable to perform, informs the client of this by
+ * sending a message with an Xvp_FAIL xvp-message-code, and the same
+ * xvp-extension-version as included in the client's operation request.
+ *
+ * A client supporting the xvp extension sends this to request that the server
+ * initiate a clean shutdown, clean reboot or abrupt reset of the system whose
+ * framebuffer the client is displaying.
+ */
+
+
+typedef struct {
+    uint8_t type;			/* always rfbXvp */
+	uint8_t pad;
+	uint8_t version;	/* xvp extension version */
+	uint8_t code;      	/* xvp message code */
+} rfbXvpMsg;
+
+#define sz_rfbXvpMsg (4)
+
+/* server message codes */
+#define rfbXvp_Fail 0
+#define rfbXvp_Init 1
+/* client message codes */
+#define rfbXvp_Shutdown 2
+#define rfbXvp_Reboot 3
+#define rfbXvp_Reset 4
+
 
 /*-----------------------------------------------------------------------------
  * Modif sf@2002
@@ -1093,6 +1184,7 @@ typedef union {
 	rfbPalmVNCReSizeFrameBufferMsg prsfb; 
 	rfbFileTransferMsg ft;
 	rfbTextChatMsg tc;
+        rfbXvpMsg xvp;
 } rfbServerToClientMsg;
 
 
@@ -1328,6 +1420,7 @@ typedef struct _rfbSetSWMsg {
 #define sz_rfbSetSWMsg 6
 
 
+
 /*-----------------------------------------------------------------------------
  * Union of all client->server messages.
  */
@@ -1347,6 +1440,7 @@ typedef union {
 	rfbFileTransferMsg ft;
 	rfbSetSWMsg sw;
 	rfbTextChatMsg tc;
+        rfbXvpMsg xvp;
 } rfbClientToServerMsg;
 
 /* 

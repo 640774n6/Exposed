@@ -12,13 +12,14 @@
 #include "rfb.h"
 #include "keysym.h"
 
-#define kBHVNCServerVersionString					@"0.7(Spider Kitten)"
+#define kBHVNCServerVersionString					@"0.8(Mega Pug)"
 #define kBHVNCServerDomainID						@"com.whatanutbar.exposed"
 #define kBHVNCServerCharacterSet					@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?\t "
 #define kBHVNCServerBackspaceString					@"\uf73e"
 #define kBHVNCServerDefaultFrameWidth				1280.0
 #define kBHVNCServerDefaultFrameHeight				720.0
 #define kBHVNCServerDefaultFrameAspectRatio			720.0 / 1280.0
+#define kBHVNCServerDefaultPassword                 @"exposed"
 #define kBHVNCServerClientConnectedNotification		@"BHVNCServerClientConnected"
 #define kBHVNCServerClientDisconnectedNotification	@"BHVNCServerClientDisconnected"
 #define kBHVNCServerShouldLaunchNotification        @"BHVNCServerShouldLaunch"

@@ -56,77 +56,80 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	NSAutoreleasePool *localPool = [[NSAutoreleasePool alloc] init];
 	if(down)
 	{
+        Class brEventClass = NSClassFromString(@"BREvent");
+        Class brApplicationClass = NSClassFromString(@"BRApplication");
+        Class atvSettingsFacadeClass = NSClassFromString(@"ATVSettingsFacade");
+        
 		switch(keySym)
 		{
 			case XK_Up:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionUp value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionUp value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				
-				event = [BREvent eventWithAction: kBREventRemoteActionUp value: 0];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				event = [brEventClass eventWithAction: kBREventRemoteActionUp value: 0];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_Down:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionDown value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionDown value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				
-				event = [BREvent eventWithAction: kBREventRemoteActionDown value: 0];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				event = [brEventClass eventWithAction: kBREventRemoteActionDown value: 0];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_Left:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionLeft value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionLeft value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				
-				event = [BREvent eventWithAction: kBREventRemoteActionLeft value: 0];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				event = [brEventClass eventWithAction: kBREventRemoteActionLeft value: 0];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_Right:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionRight value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionRight value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				
-				event = [BREvent eventWithAction: kBREventRemoteActionRight value: 0];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				event = [brEventClass eventWithAction: kBREventRemoteActionRight value: 0];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_Escape:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionMenu value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionMenu value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_Return:
 			case XK_KP_Enter:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionPlay value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionPlay value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_F1:
 			{
-				BREvent *event = [BREvent eventWithAction: kBREventRemoteActionPlayNew value: 1];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: kBREventRemoteActionPlayNew value: 1];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			case XK_Delete:
 			case XK_BackSpace:
 			{
-				NSString *eventStr = [NSString stringWithString: kBHVNCServerBackspaceString];
-				NSDictionary *eventDict = [NSDictionary dictionaryWithObjectsAndKeys: eventStr, @"kBRKeyEventCharactersKey", nil];
-				NSString *osBuild = [[ATVSettingsFacade singleton] versionOSBuild];
+				NSDictionary *eventDict = [NSDictionary dictionaryWithObjectsAndKeys: kBHVNCServerBackspaceString, @"kBRKeyEventCharactersKey", nil];
+				NSString *osBuild = [[atvSettingsFacadeClass singleton] versionOSBuild];
 				int eventAction = 48;
 				if([osBuild isEqualToString: @"8M89"])
 				{ eventAction = 47; }
 				else if([osBuild isEqualToString: @"8C154"] || [osBuild isEqualToString: @"8C150"])
 				{ eventAction = 48; }
 				
-				BREvent *event = [BREvent eventWithAction: eventAction value: 1 atTime: 0 originator: 0 eventDictionary: eventDict allowRetrigger: NO];
-				[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+				BREvent *event = [brEventClass eventWithAction: eventAction value: 1 atTime: 0 originator: 0 eventDictionary: eventDict allowRetrigger: NO];
+				[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				break;
 			}
 			default:
@@ -136,15 +139,15 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 				{
 					NSString *eventStr = [NSString stringWithFormat: @"%c", keySym];
 					NSDictionary *eventDict = [NSDictionary dictionaryWithObjectsAndKeys: eventStr, @"kBRKeyEventCharactersKey", nil];
-					NSString *osBuild = [[ATVSettingsFacade singleton] versionOSBuild];
+					NSString *osBuild = [[atvSettingsFacadeClass singleton] versionOSBuild];
 					int eventAction = 48;
 					if([osBuild isEqualToString: @"8M89"])
 					{ eventAction = 47; }
 					else if([osBuild isEqualToString: @"8C154"] || [osBuild isEqualToString: @"8C150"])
 					{ eventAction = 48; }
 					
-					BREvent *event = [BREvent eventWithAction: eventAction value: 1 atTime: 0 originator: 0 eventDictionary: eventDict allowRetrigger: NO];
-					[[BRApplication sharedApplication] dispatchEventOnEventThread: event];
+					BREvent *event = [brEventClass eventWithAction: eventAction value: 1 atTime: 0 originator: 0 eventDictionary: eventDict allowRetrigger: NO];
+					[[brApplicationClass sharedApplication] dispatchEventOnEventThread: event];
 				}
 				break;
 			}
@@ -206,7 +209,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 										 [NSNumber numberWithFloat: kBHVNCServerDefaultFrameWidth], kVNCSettingsScaledWidthKey,
 										 [NSNumber numberWithFloat: kBHVNCServerDefaultFrameHeight], kVNCSettingsScaledHeightKey,
 										 [NSNumber numberWithBool: NO], kVNCSettingsForceFallbackKey,
-										 [NSString stringWithString: @""], kVNCSettingsVNCPasswordKey, nil];
+										 kBHVNCServerDefaultPassword, kVNCSettingsVNCPasswordKey, nil];
 		
 		NSData *settingsData = [NSPropertyListSerialization dataWithPropertyList: settings format: NSPropertyListXMLFormat_v1_0 options: 0 error: nil];
 		[settingsData writeToFile: settingsPath atomically: YES];
@@ -247,7 +250,8 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	int allocSize = width * height * bytesPerComponent;
 	OSType pixelFormat = 'BGRA';
 	
-	CALayer *screenLayer = [BRWindow rootLayer];
+    Class brWindowClass = NSClassFromString(@"BRWindow");
+	CALayer *screenLayer = [brWindowClass rootLayer];
 	uint32_t *layerBuffer = (uint32_t *)malloc(allocSize);
 	
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
@@ -365,7 +369,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 		rfbServer->desktopName = "Exposed - AppleTV VNC Server";
 		rfbServer->alwaysShared = TRUE;
 		rfbServer->handleEventsEagerly = TRUE;
-		rfbServer->deferUpdateTime = 40;
+		rfbServer->deferUpdateTime = 100;
 		rfbServer->cursor = NULL;
 		rfbServer->kbdAddEvent = &kbdEvent;
 		rfbServer->newClientHook = &newClient;
