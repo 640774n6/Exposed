@@ -156,6 +156,60 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	[localPool drain];
 }
 
+#pragma mark -
+#pragma mark Frame Differerencing Algorithm
+#pragma mark
+
+static void rfbScreenUpdateRemoteBufferWithChanges(uint32_t *remoteBuffer, uint32_t *newBuffer, rfbScreenInfoPtr rfbScreen)
+{
+    uint32_t *f = (uint32_t *)newBuffer;
+    uint32_t *r = (uint32_t *)remoteBuffer;
+    
+    int min_x, min_y = INT_MAX;
+    int max_x, max_y = -1;
+    
+    for(int y = 0; y < rfbScreen->height; y++)
+    {
+        for(int x = 0; x < rfbScreen->width; x++)
+        {
+            uint32_t pixel = *f;
+            if(pixel != *r)
+            {
+                *r = pixel;
+                
+                if (x < min_x)
+                { min_x = x; }
+                else
+                {
+                    if(x > max_x)
+                    { max_x = x; }
+                }
+                
+                if(y < min_y)
+                { min_y = y; }
+                else
+                {
+                    if(y > max_y)
+                    { max_y = y; }
+                }
+            }
+            f++;
+            r++;
+        }
+    }
+    
+    if(min_x < INT_MAX)
+    {
+        if(max_x < 0)
+        { max_x = min_x; }
+        
+        if(max_y < 0)
+        { max_y = min_y; }
+        
+        rfbMarkRectAsModified(rfbScreen, min_x, min_y, max_x + 1, max_y + 1);
+    }
+}
+
 @implementation BHVNCServer
 
 #pragma mark -
@@ -164,7 +218,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 
 - (id) init
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(vncSettingsUpdated:) name: kVNCSettingsUpdatedNotification object: nil];
 		_serverStarted = NO;
@@ -253,12 +307,14 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
     Class brWindowClass = NSClassFromString(@"BRWindow");
 	CALayer *screenLayer = [brWindowClass rootLayer];
 	uint32_t *layerBuffer = (uint32_t *)malloc(allocSize);
-	
+    uint32_t *frameBuffer = layerBuffer;
+    uint32_t *remoteBuffer = (uint32_t *)malloc(allocSize);
+    rfbServer->frameBuffer = (char *)remoteBuffer;
+    
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 	CGContextRef layerBufferCtx = CGBitmapContextCreate(layerBuffer, width, height, 8, width * 4, colorSpace, kCGImageAlphaPremultipliedLast);
 	CGContextScaleCTM(layerBufferCtx, (width / screenLayer.frame.size.width), (height / screenLayer.frame.size.height));
-	rfbServer->frameBuffer = (char *)layerBuffer;
-	
+    
 	NSMutableDictionary *surfaceDict = [NSMutableDictionary dictionary];
 	[surfaceDict setObject: [NSNumber numberWithBool: NO] forKey: (NSString *)kIOSurfaceIsGlobal];
 	[surfaceDict setObject: [NSNumber numberWithInt: bytesPerRow] forKey: (NSString *)kIOSurfaceBytesPerRow];
@@ -274,7 +330,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	while(_serverStarted)
 	{
 		if(rfbServer->clientHead)
-		{
+		{            
             if(!screenSurface && IOSurfaceLookup(1))
             { screenSurface = [BHVNCServer findSurfaceWithHighestSeed]; }
                 
@@ -291,15 +347,17 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 					IOSurfaceAcceleratorCreate(kCFAllocatorDefault, 0, &accelerator);
 									
 					IOSurfaceLock(convSurface, 1, NULL);
-					rfbServer->frameBuffer = (char *)IOSurfaceGetBaseAddress(convSurface);
-					IOSurfaceUnlock(convSurface, 1, NULL);
+					frameBuffer = (uint32_t *)IOSurfaceGetBaseAddress(convSurface);
+                    IOSurfaceUnlock(convSurface, 1, NULL);
 					usingFallback = NO;
 				}
+                
 				IOSurfaceAcceleratorTransferSurface(accelerator, screenSurface, convSurface, (CFDictionaryRef)[NSDictionary dictionaryWithObjectsAndKeys: nil], NULL);
 			}
 			else
 			{ [screenLayer renderInContext: layerBufferCtx]; }
-			rfbMarkRectAsModified(rfbServer, 0, 0, rfbServer->width, rfbServer->height);
+            
+            rfbScreenUpdateRemoteBufferWithChanges(remoteBuffer, frameBuffer, rfbServer);
 		}
 		rfbProcessEvents(rfbServer, rfbServer->deferUpdateTime);
 	}
@@ -307,6 +365,7 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 	CGContextRelease(layerBufferCtx);
 	CGColorSpaceRelease(colorSpace);
 	free(layerBuffer);
+    free(remoteBuffer);
 	
 	CFRelease(accelerator);
 	CFRelease(convSurface);
@@ -380,7 +439,9 @@ static void kbdEvent(rfbBool down, rfbKeySym keySym, struct _rfbClientRec *cl)
 			rfbServer->passwordCheck = &passCheck;
 		}
 
-		rfbInitServer(rfbServer);		
+		rfbInitServer(rfbServer);
+        rfbMarkRectAsModified(rfbServer, 0, 0, rfbServer->width, rfbServer->height);
+        
 		_serverStarted = YES;
 		usingFallback = YES;
         screenSurface = NULL;
