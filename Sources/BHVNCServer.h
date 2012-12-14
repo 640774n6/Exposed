@@ -12,7 +12,7 @@
 #include "rfb.h"
 #include "keysym.h"
 
-#define kBHVNCServerVersionString					@"0.8.1(Mega Pug)"
+#define kBHVNCServerVersionString					@"0.8.2(Mega Pug)"
 #define kBHVNCServerDomainID						@"com.whatanutbar.exposed"
 #define kBHVNCServerCharacterSet					@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?\t "
 #define kBHVNCServerBackspaceString					@"\uf73e"
@@ -20,6 +20,7 @@
 #define kBHVNCServerDefaultFrameHeight				720.0
 #define kBHVNCServerDefaultFrameAspectRatio			720.0 / 1280.0
 #define kBHVNCServerDefaultPassword                 @"exposed"
+#define kBHVNCServerDefaultPort                     5900
 #define kBHVNCServerClientConnectedNotification		@"BHVNCServerClientConnected"
 #define kBHVNCServerClientDisconnectedNotification	@"BHVNCServerClientDisconnected"
 #define kBHVNCServerShouldLaunchNotification        @"BHVNCServerShouldLaunch"
@@ -31,6 +32,7 @@
 #define kVNCSettingsScaledHeightKey					@"ScaledHeight"
 #define kVNCSettingsForceFallbackKey				@"ForceFallback"
 #define kVNCSettingsVNCPasswordKey					@"VNCPassword"
+#define kVNCSettingsVNCPortKey                      @"VNCPort"
 #define kVNCSettingsUpdatedNotification				@"VNCSettingsUpdated"
 
 typedef struct
@@ -42,6 +44,7 @@ typedef struct
 	CGFloat scaledHeight;
 	BOOL forceFallback;
 	NSString *password;
+    uint32_t port;
 } BHVNCSettings;
 
 @interface BHVNCServer: NSObject 
@@ -53,6 +56,8 @@ typedef struct
     IOSurfaceRef screenSurface;
 }
 + (id) sharedInstance;
++ (NSDictionary *) defaultSettingsDict;
++ (BOOL) updateSettingsDictIfNecessary: (NSMutableDictionary *) settingsDict;
 + (NSDictionary *) settingsDict;
 - (void) prepareForLaunch;
 - (void) updateFromSettings;

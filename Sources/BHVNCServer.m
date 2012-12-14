@@ -249,6 +249,36 @@ static void rfbScreenUpdateRemoteBufferWithChanges(uint32_t *remoteBuffer, uint3
 	return server;
 }
 
++ (NSDictionary *) defaultSettingsDict
+{
+    NSDictionary *defaultSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                     [NSNumber numberWithBool: YES], kVNCSettingsEnabledKey,
+                                     [NSNumber numberWithBool: YES], kVNCSettingsDefaultScreenSizeKey,
+                                     [NSNumber numberWithBool: YES], kVNCSettingsKeepAspectRatioKey,
+                                     [NSNumber numberWithFloat: kBHVNCServerDefaultFrameWidth], kVNCSettingsScaledWidthKey,
+                                     [NSNumber numberWithFloat: kBHVNCServerDefaultFrameHeight], kVNCSettingsScaledHeightKey,
+                                     [NSNumber numberWithBool: NO], kVNCSettingsForceFallbackKey,
+                                     kBHVNCServerDefaultPassword, kVNCSettingsVNCPasswordKey,
+                                     [NSNumber numberWithUnsignedInteger: 5900], kVNCSettingsVNCPortKey, nil];
+    return defaultSettings;
+}
+
++ (BOOL) updateSettingsDictIfNecessary: (NSMutableDictionary *) settingsDict
+{
+    BOOL changesMade = NO;
+    NSDictionary *defaultSettingsDict = [BHVNCServer defaultSettingsDict];
+    NSArray *latestVersionKeys = [defaultSettingsDict allKeys];
+    for(NSString *key in latestVersionKeys)
+    {
+        if([settingsDict objectForKey: key] == nil)
+        {
+            [settingsDict setObject: [defaultSettingsDict objectForKey: key] forKey: key];
+            changesMade = YES;
+        }
+    }
+    return changesMade;
+}
+
 + (NSDictionary *) settingsDict
 { 
 	NSString *settingsPath = [[NSString stringWithFormat: @"~/Library/Preferences/%@.plist", kBHVNCServerDomainID] stringByExpandingTildeInPath];
@@ -256,18 +286,22 @@ static void rfbScreenUpdateRemoteBufferWithChanges(uint32_t *remoteBuffer, uint3
 	if(!settings)
 	{
 		NSLog(@"Exposed -> settings not found, creating defaults...");
-		settings = [NSDictionary dictionaryWithObjectsAndKeys:
-										 [NSNumber numberWithBool: YES], kVNCSettingsEnabledKey,
-										 [NSNumber numberWithBool: YES], kVNCSettingsDefaultScreenSizeKey,
-										 [NSNumber numberWithBool: YES], kVNCSettingsKeepAspectRatioKey,
-										 [NSNumber numberWithFloat: kBHVNCServerDefaultFrameWidth], kVNCSettingsScaledWidthKey,
-										 [NSNumber numberWithFloat: kBHVNCServerDefaultFrameHeight], kVNCSettingsScaledHeightKey,
-										 [NSNumber numberWithBool: NO], kVNCSettingsForceFallbackKey,
-										 kBHVNCServerDefaultPassword, kVNCSettingsVNCPasswordKey, nil];
+        settings = [BHVNCServer defaultSettingsDict];
 		
 		NSData *settingsData = [NSPropertyListSerialization dataWithPropertyList: settings format: NSPropertyListXMLFormat_v1_0 options: 0 error: nil];
 		[settingsData writeToFile: settingsPath atomically: YES];
 	}
+    else
+    {
+        NSMutableDictionary *updatedSettingsDict = [NSMutableDictionary dictionaryWithDictionary: settings];
+        if([BHVNCServer updateSettingsDictIfNecessary: updatedSettingsDict])
+        {
+            NSLog(@"Exposed -> settings repaired or upgraded...");
+            settings = updatedSettingsDict;
+            NSData *settingsData = [NSPropertyListSerialization dataWithPropertyList: settings format: NSPropertyListXMLFormat_v1_0 options: 0 error: nil];
+            [settingsData writeToFile: settingsPath atomically: YES];
+        }
+    }
 	return settings;
 }
 
@@ -402,6 +436,7 @@ static void rfbScreenUpdateRemoteBufferWithChanges(uint32_t *remoteBuffer, uint3
 	
 	[_currentSettings.password release];
 	_currentSettings.password = [[settingsDict objectForKey: kVNCSettingsVNCPasswordKey] retain];
+    _currentSettings.port = [[settingsDict objectForKey: kVNCSettingsVNCPortKey] unsignedIntegerValue];
 	
 	if(_currentSettings.keepAspectRatio)
 	{ _currentSettings.scaledHeight = _currentSettings.scaledWidth * kBHVNCServerDefaultFrameAspectRatio; }
@@ -426,6 +461,7 @@ static void rfbScreenUpdateRemoteBufferWithChanges(uint32_t *remoteBuffer, uint3
 		NSLog(@"Exposed -> starting server...");
 		rfbServer = rfbGetScreen(0, NULL, _currentSettings.scaledWidth, _currentSettings.scaledHeight, 8, 3, 4);
 		rfbServer->desktopName = "Exposed - AppleTV VNC Server";
+        rfbServer->port = _currentSettings.port;
 		rfbServer->alwaysShared = TRUE;
 		rfbServer->handleEventsEagerly = TRUE;
 		rfbServer->deferUpdateTime = 100;
